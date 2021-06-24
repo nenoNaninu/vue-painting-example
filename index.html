@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Canvas Paint</title>
+</head>
+
+<body>
+    <main>
+        <div id="app">
+            <div>
+                <label>Drawing tool:
+                </label>
+
+                <select id="tool_selector" v-on:change="OnChangeToolSelector">
+                    <option value="line">Line</option>
+                    <option value="fill_line">Fill Line</option>
+                    <option value="ellipse">Ellipse</option>
+                    <option value="rectangle">Rectangle</option>
+                </select>
+
+                <button v-on:click="Duplicate">Duplicate</button>
+
+            </div>
+            <div id="history_buttons" class="history">
+                <button v-on:click="Undo">
+                    ←
+                </button>
+                <button v-on:click="Redo">
+                    →
+                </button>
+            </div>
+
+            <canvas id="imageView" v-bind:width="canvas_width" v-bind:height="canvas_height" ref="canvas"
+                v-on:mousedown="OnMousedownInCanvas" v-on:mousemove="OnMousemoveInCanvas"
+                v-on:mouseup="OnMouseupInCanvas" v-on:touchdown="OnMousedownInCanvas"
+                v-on:touchmove="OnMousemoveInCanvas" v-on:touchup="OnMouseupInCanvas"></canvas>
+            <img v-bind:src="result_img" id="resultView" v-bind:width="canvas_width" v-bind:height="canvas_height"
+                class="canvas_resultView" v-show="show_img">
+
+            <div>
+                <button v-for="(item, index) in palette_list" v-bind:key="index" v-on:click="OnClickPaletteButton(item)">
+                    {{item.Name()}}
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>
+    <script src="main.js"></script>
+
+    <script>
+        class Config {
+            #palette_list;
+
+            constructor() {
+                this.#palette_list = this.#create_palette_list();
+            }
+
+            GetPaletteList(){
+                return this.#palette_list;
+            }
+
+            #create_palette_list() {
+                const palette_list = {};
+
+                palette_list["Background"] = new ColorPalette("Background", "#000000");
+                palette_list["Smoky Pink"] = new ColorPalette("Smoky Pink", "#e28080");
+                palette_list["Brown"] = new ColorPalette("Brown", "#402020");
+                palette_list["Red"] = new ColorPalette("Red", "#ff0000");
+                palette_list["Yellow"] = new ColorPalette("Yellow", "#ffbf00");
+                palette_list["Yellow green"] = new ColorPalette("Yellow green", "#7fff00");
+                palette_list["Green"] = new ColorPalette("Green", "#00ff3f");
+                palette_list["Light blue"] = new ColorPalette("Light blue", "#00ffff");
+                palette_list["Blue"] = new ColorPalette("Blue", "#003fff");
+                palette_list["Purple"] = new ColorPalette("Purple", "#7f00ff");
+                palette_list["Pink"] = new ColorPalette("Pink", "#ff00bf");
+               
+                return palette_list;
+            }
+        }
+
+        const app = new Vue({
+            el: '#app',
+
+            data: {
+                canvas_width: 500,
+                canvas_height: 500,
+                current_tool: null,
+                canvas: null,
+                show_img: false,
+                palette_list: null,
+                config: null,
+                context: null,
+                canvasController: null,
+                result_img: ""
+            },
+
+            mounted: function () {
+                const config = new Config();
+                this.config = config;
+                this.palette_list = config.GetPaletteList();
+                this.canvas = this.$refs.canvas;
+                this.canvasController = new CanvasController(this.canvas, this.palette_list[0]);
+                this.canvasController.ChangeColor(this.palette_list["Background"].ColorCode());
+            },
+
+            methods: {
+                Undo: function () {
+                    console.log("undo")
+                    this.canvasController.Undo();
+                },
+
+                Redo: function () {
+                    console.log("redu");
+                    this.canvasController.Redo();
+                },
+
+                OnClickPaletteButton: function (e) {
+                    console.log(e);
+                    const palette = this.palette_list[e.Name()];
+
+                    if (palette) {
+                        this.canvasController.ChangeColor(palette.ColorCode());
+                    }
+                },
+
+                OnChangeToolSelector: function (e) {
+                    console.log(e);
+                    console.log(e.target.value);
+                    this.canvasController.ChangePencil(e.target.value);
+                },
+
+                OnMousedownInCanvas: function (e) {
+                    const point = Utility.GetPos(this.canvas, e);
+                    this.canvasController.OnMouseDown(point);
+                },
+
+                OnMousemoveInCanvas: function (e) {
+                    const point = Utility.GetPos(this.canvas, e);
+                    this.canvasController.OnMouseMove(point);
+                },
+
+                OnMouseupInCanvas: function (e) {
+                    const point = Utility.GetPos(this.canvas, e);
+                    this.canvasController.OnMouseup(point);
+                },
+
+                Duplicate: function () {
+                    const dataURL = this.canvas.toDataURL('image/png');
+                    this.result_img = dataURL;
+                    this.show_img = true;
+                },
+
+                Download: function (e) {
+                }
+            }
+        });
+
+    </script>
+
+</body>
+
+</html>
