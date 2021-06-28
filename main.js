@@ -1,4 +1,4 @@
-class ColorPalette {
+export class ColorPalette {
     #name;
     #color_code;
 
@@ -60,7 +60,7 @@ class History {
     }
 }
 
-class CanvasController {
+export class CanvasController {
     #canvas;
     #context;
     #history;
@@ -439,7 +439,7 @@ class Point {
     }
 }
 
-class Utility {
+export class Utility {
 
     static GetPos(canvas, e) {
         let x;

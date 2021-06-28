@@ -47,9 +47,10 @@
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>
-    <script src="main.js"></script>
 
-    <script>
+    <script type="module">
+        import {ColorPalette, CanvasController, Utility} from './main.js';
+
         class Config {
             #palette_list;
 
