@@ -151,6 +151,11 @@ export class CanvasController {
             shape.Draw(this.#context);
         }
     }
+
+    ChangeLineWidth(value) {
+        this.#writing_pencils["line"].SetLineWidth(value);
+        this.#writing_pencils["fill_line"].SetLineWidth(value);
+    }
 }
 
 class LineShape {
@@ -158,10 +163,12 @@ class LineShape {
     #color;
     #is_finish = false;
     #fill = true;
+    #line_width = 5;
 
-    constructor(color, fill) {
+    constructor(color, fill, line_width) {
         this.#color = color;
         this.#fill = fill;
+        this.#line_width = line_width;
     }
 
     Start(point) {
@@ -185,7 +192,7 @@ class LineShape {
         }
 
         context.beginPath();
-        context.lineWidth = 5;
+        context.lineWidth = this.#line_width;
         context.lineCap = "round";
         context.moveTo(this.#point_list[0].x, this.#point_list[0].y);
 
@@ -291,6 +298,7 @@ class LinePencil {
     #color;
     #fill;
     #drawing_shape = null;
+    #line_width = 5;
 
     constructor(color, fill) {
         this.#color = color;
@@ -311,15 +319,15 @@ class LinePencil {
 
     MouseDown(point) {
         this.#is_drawing = true;
-        this.#drawing_shape = new LineShape(this.#color, this.#fill);
+        this.#drawing_shape = new LineShape(this.#color, this.#fill, this.#line_width);
         this.#drawing_shape.Start(point);
-    };
+    }
 
     MouseMove(point) {
         if (this.#is_drawing) {
             this.#drawing_shape.Update(point);
         }
-    };
+    }
 
     MouseUp(point) {
         if (this.#is_drawing) {
@@ -332,7 +340,11 @@ class LinePencil {
         }
 
         return null;
-    };
+    }
+
+    SetLineWidth(value) {
+        this.#line_width = value;
+    }
 }
 
 class EllipsePencil {
