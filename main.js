@@ -1,97 +1,97 @@
 export class ColorPalette {
-    #name;
-    #color_code;
+    _name;
+    _color_code;
 
     Name() {
-        return this.#name;
+        return this._name;
     }
 
     ColorCode() {
-        return this.#color_code;
+        return this._color_code;
     }
 
     constructor(name, color_code) {
-        this.#name = name;
-        this.#color_code = color_code;
+        this._name = name;
+        this._color_code = color_code;
     }
 }
 
 class History {
-    #shape_array = [];
-    #step = -1;
+    _shape_array = [];
+    _step = -1;
 
     Length() {
         // console.log("Length");
-        return this.#shape_array.length;
+        return this._shape_array.length;
     }
 
     Clear() {
-        this.#shape_array = [];
-        this.#step = -1; // index
+        this._shape_array = [];
+        this._step = -1; // index
     }
 
     Push(data) {
-        const next_step = this.#step + 1;
+        const next_step = this._step + 1;
 
-        if (next_step < this.#shape_array.length) {
-            this.#shape_array.length = next_step;
+        if (next_step < this._shape_array.length) {
+            this._shape_array.length = next_step;
         }
 
-        this.#step = next_step;
-        this.#shape_array.push(data);
+        this._step = next_step;
+        this._shape_array.push(data);
     }
 
     Undo() {
-        if (0 <= this.#step) {
-            this.#step--;
+        if (0 <= this._step) {
+            this._step--;
         }
     }
 
     Redo() {
-        if (this.#step + 1 < this.#shape_array.length) {
-            this.#step++;
+        if (this._step + 1 < this._shape_array.length) {
+            this._step++;
         }
     }
 
     Draw(context) {
-        for (let i = 0; i <= this.#step; i++) {
-            this.#shape_array[i].Draw(context);
+        for (let i = 0; i <= this._step; i++) {
+            this._shape_array[i].Draw(context);
         }
     }
 }
 
 export class CanvasController {
-    #canvas;
-    #context;
-    #history;
-    #writing_pencils;
-    #brush_color;
-    #current_pencil;
+    _canvas;
+    _context;
+    _history;
+    _writing_pencils;
+    _brush_color;
+    _current_pencil;
 
     constructor(canvas, brush_color) {
-        this.#canvas = canvas;
-        this.#context = this.#canvas.getContext('2d');
-        this.#history = new History();
-        this.#brush_color = brush_color;
+        this._canvas = canvas;
+        this._context = this._canvas.getContext('2d');
+        this._history = new History();
+        this._brush_color = brush_color;
 
-        this.#writing_pencils = {};
-        this.#writing_pencils["line"] = new LinePencil(this.#brush_color, false);
-        this.#writing_pencils["fill_line"] = new LinePencil(this.#brush_color, true);
-        this.#writing_pencils["ellipse"] = new EllipsePencil(this.#brush_color);
-        this.#writing_pencils["rectangle"] = new RectanglePencil(this.#brush_color);
+        this._writing_pencils = {};
+        this._writing_pencils["line"] = new LinePencil(this._brush_color, false);
+        this._writing_pencils["fill_line"] = new LinePencil(this._brush_color, true);
+        this._writing_pencils["ellipse"] = new EllipsePencil(this._brush_color);
+        this._writing_pencils["rectangle"] = new RectanglePencil(this._brush_color);
 
-        this.#current_pencil = this.#writing_pencils["line"];
+        this._current_pencil = this._writing_pencils["line"];
 
         this.Clear();
     }
 
     Undo() {
-        this.#history.Undo();
+        this._history.Undo();
         this.Draw();
     }
 
     Redo() {
-        this.#history.Redo();
+        this._history.Redo();
         this.Draw();
     }
 
@@ -99,111 +99,111 @@ export class CanvasController {
         this.ClearCanvas();
 
         // History reset
-        this.#history.Clear();
+        this._history.Clear();
     }
 
     ChangePencil(target) {
-        this.#current_pencil = this.#writing_pencils[target];
+        this._current_pencil = this._writing_pencils[target];
     }
 
     ChangeColor(color) {
-        this.#writing_pencils["line"].ChangeColor(color);
-        this.#writing_pencils["fill_line"].ChangeColor(color);
-        this.#writing_pencils["ellipse"].ChangeColor(color);
-        this.#writing_pencils["rectangle"].ChangeColor(color);
+        this._writing_pencils["line"].ChangeColor(color);
+        this._writing_pencils["fill_line"].ChangeColor(color);
+        this._writing_pencils["ellipse"].ChangeColor(color);
+        this._writing_pencils["rectangle"].ChangeColor(color);
     }
 
     OnMouseDown(point) {
-        this.#current_pencil.MouseDown(point);
+        this._current_pencil.MouseDown(point);
         this.Draw();
     }
 
     OnMouseMove(point) {
-        if (this.#current_pencil.IsDrawing()) {
-            this.#current_pencil.MouseMove(point);
+        if (this._current_pencil.IsDrawing()) {
+            this._current_pencil.MouseMove(point);
             this.Draw();
         }
     }
 
     OnMouseup(point) {
-        if (this.#current_pencil.IsDrawing()) {
-            var shape = this.#current_pencil.MouseUp(point);
+        if (this._current_pencil.IsDrawing()) {
+            var shape = this._current_pencil.MouseUp(point);
 
             if (shape) {
-                this.#history.Push(shape);
+                this._history.Push(shape);
             }
         }
         this.Draw();
     }
 
     ClearCanvas() {
-        this.#context.clearRect(0, 0, this.#canvas.width, this.#canvas.height);
-        this.#context.fillStyle = "black";
-        this.#context.fillRect(0, 0, this.#canvas.width, this.#canvas.height);
+        this._context.clearRect(0, 0, this._canvas.width, this._canvas.height);
+        this._context.fillStyle = "black";
+        this._context.fillRect(0, 0, this._canvas.width, this._canvas.height);
     }
 
     Draw() {
         this.ClearCanvas();
-        this.#history.Draw(this.#context);
+        this._history.Draw(this._context);
 
-        const shape = this.#current_pencil.GetDrawingShape();
+        const shape = this._current_pencil.GetDrawingShape();
         if (shape) {
-            shape.Draw(this.#context);
+            shape.Draw(this._context);
         }
     }
 
     ChangeLineWidth(value) {
-        this.#writing_pencils["line"].SetLineWidth(value);
-        this.#writing_pencils["fill_line"].SetLineWidth(value);
+        this._writing_pencils["line"].SetLineWidth(value);
+        this._writing_pencils["fill_line"].SetLineWidth(value);
     }
 }
 
 class LineShape {
-    #point_list = [];
-    #color;
-    #is_finish = false;
-    #fill = true;
-    #line_width = 5;
+    _point_list = [];
+    _color;
+    _is_finish = false;
+    _fill = true;
+    _line_width = 5;
 
     constructor(color, fill, line_width) {
-        this.#color = color;
-        this.#fill = fill;
-        this.#line_width = line_width;
+        this._color = color;
+        this._fill = fill;
+        this._line_width = line_width;
     }
 
     Start(point) {
-        this.#point_list.push(point);
+        this._point_list.push(point);
     }
 
     Update(point) {
-        this.#point_list.push(point);
+        this._point_list.push(point);
     }
 
     Finish() {
-        this.#is_finish = true;
+        this._is_finish = true;
     }
 
     Draw(context) {
         context.beginPath();
-        context.strokeStyle = this.#color;
+        context.strokeStyle = this._color;
 
-        if (this.#point_list.length < 1) {
+        if (this._point_list.length < 1) {
             return;
         }
 
         context.beginPath();
-        context.lineWidth = this.#line_width;
+        context.lineWidth = this._line_width;
         context.lineCap = "round";
-        context.moveTo(this.#point_list[0].x, this.#point_list[0].y);
+        context.moveTo(this._point_list[0].x, this._point_list[0].y);
 
-        for (let i = 1; i < this.#point_list.length; i++) {
-            context.lineTo(this.#point_list[i].x, this.#point_list[i].y);
+        for (let i = 1; i < this._point_list.length; i++) {
+            context.lineTo(this._point_list[i].x, this._point_list[i].y);
         }
 
         context.stroke();
 
-        if (this.#is_finish && this.#fill) {
-            context.fillStyle = this.#color;
+        if (this._is_finish && this._fill) {
+            context.fillStyle = this._color;
             context.fill();
         }
 
@@ -213,36 +213,36 @@ class LineShape {
 
 class RectangleShape {
 
-    #color;
-    #is_finish = false;
-    #start_point = null;
-    #end_point = null;
+    _color;
+    _is_finish = false;
+    _start_point = null;
+    _end_point = null;
 
     constructor(color) {
-        this.#color = color;
+        this._color = color;
     }
 
     Finish() {
-        this.#is_finish = true;
+        this._is_finish = true;
     }
 
     Start(point) {
-        this.#start_point = point;
+        this._start_point = point;
     }
 
     Update(point) {
-        this.#end_point = point;
+        this._end_point = point;
     }
 
     Draw(context) {
-        if (this.#start_point && this.#end_point) {
-            const min_x = Math.min(this.#end_point.x, this.#start_point.x);
-            const min_y = Math.min(this.#end_point.y, this.#start_point.y);
+        if (this._start_point && this._end_point) {
+            const min_x = Math.min(this._end_point.x, this._start_point.x);
+            const min_y = Math.min(this._end_point.y, this._start_point.y);
 
-            const w = Math.abs(this.#end_point.x - this.#start_point.x);
-            const h = Math.abs(this.#end_point.y - this.#start_point.y);
+            const w = Math.abs(this._end_point.x - this._start_point.x);
+            const h = Math.abs(this._end_point.y - this._start_point.y);
 
-            context.fillStyle = this.#color;
+            context.fillStyle = this._color;
             context.fillRect(min_x, min_y, w, h);
         }
     }
@@ -250,41 +250,41 @@ class RectangleShape {
 
 class EllipseShape {
 
-    #color;
-    #is_finish = false;
-    #start_point = null;
-    #end_point = null;
+    _color;
+    _is_finish = false;
+    _start_point = null;
+    _end_point = null;
 
     constructor(color) {
-        this.#color = color;
+        this._color = color;
     }
 
     Finish() {
-        this.#is_finish = true;
+        this._is_finish = true;
     }
 
     Start(point) {
-        this.#start_point = point;
+        this._start_point = point;
     }
 
     Update(point) {
-        this.#end_point = point;
+        this._end_point = point;
     }
 
     Draw(context) {
-        if (this.#start_point && this.#end_point) {
-            const min_x = Math.min(this.#end_point.x, this.#start_point.x);
-            const min_y = Math.min(this.#end_point.y, this.#start_point.y);
+        if (this._start_point && this._end_point) {
+            const min_x = Math.min(this._end_point.x, this._start_point.x);
+            const min_y = Math.min(this._end_point.y, this._start_point.y);
 
-            const w = Math.abs(this.#end_point.x - this.#start_point.x);
-            const h = Math.abs(this.#end_point.y - this.#start_point.y);
+            const w = Math.abs(this._end_point.x - this._start_point.x);
+            const h = Math.abs(this._end_point.y - this._start_point.y);
 
             const centerX = min_x + w / 2;
             const centerY = min_y + h / 2;
 
             context.beginPath();
-            context.fillStyle = this.#color;
-            context.strokeStyle = this.#color;
+            context.fillStyle = this._color;
+            context.strokeStyle = this._color;
             context.ellipse(centerX, centerY, w / 2, h / 2, 0, 0, 2 * Math.PI)
             context.fill()
             context.stroke();
@@ -294,48 +294,48 @@ class EllipseShape {
 
 
 class LinePencil {
-    #is_drawing = false;
-    #color;
-    #fill;
-    #drawing_shape = null;
-    #line_width = 5;
+    _is_drawing = false;
+    _color;
+    _fill;
+    _drawing_shape = null;
+    _line_width = 5;
 
     constructor(color, fill) {
-        this.#color = color;
-        this.#fill = fill;
+        this._color = color;
+        this._fill = fill;
     }
 
     IsDrawing() {
-        return this.#is_drawing;
+        return this._is_drawing;
     }
 
     GetDrawingShape() {
-        return this.#drawing_shape;
+        return this._drawing_shape;
     }
 
     ChangeColor(color) {
-        this.#color = color;
+        this._color = color;
     }
 
     MouseDown(point) {
-        this.#is_drawing = true;
-        this.#drawing_shape = new LineShape(this.#color, this.#fill, this.#line_width);
-        this.#drawing_shape.Start(point);
+        this._is_drawing = true;
+        this._drawing_shape = new LineShape(this._color, this._fill, this._line_width);
+        this._drawing_shape.Start(point);
     }
 
     MouseMove(point) {
-        if (this.#is_drawing) {
-            this.#drawing_shape.Update(point);
+        if (this._is_drawing) {
+            this._drawing_shape.Update(point);
         }
     }
 
     MouseUp(point) {
-        if (this.#is_drawing) {
-            let shape = this.#drawing_shape;
-            this.#drawing_shape.Update(point);
-            this.#drawing_shape.Finish();
-            this.#drawing_shape = null;
-            this.#is_drawing = false;
+        if (this._is_drawing) {
+            let shape = this._drawing_shape;
+            this._drawing_shape.Update(point);
+            this._drawing_shape.Finish();
+            this._drawing_shape = null;
+            this._is_drawing = false;
             return shape;
         }
 
@@ -343,50 +343,50 @@ class LinePencil {
     }
 
     SetLineWidth(value) {
-        this.#line_width = value;
+        this._line_width = value;
     }
 }
 
 class EllipsePencil {
-    #is_drawing = false;
-    #color;
-    #drawing_shape = null;
+    _is_drawing = false;
+    _color;
+    _drawing_shape = null;
 
     constructor(color) {
-        this.#color = color;
+        this._color = color;
     }
 
     IsDrawing() {
-        return this.#is_drawing;
+        return this._is_drawing;
     }
 
     GetDrawingShape() {
-        return this.#drawing_shape;
+        return this._drawing_shape;
     }
 
     ChangeColor(color) {
-        this.#color = color;
+        this._color = color;
     }
 
     MouseDown(point) {
-        this.#drawing_shape = new EllipseShape(this.#color);
-        this.#drawing_shape.Start(point);
-        this.#is_drawing = true;
+        this._drawing_shape = new EllipseShape(this._color);
+        this._drawing_shape.Start(point);
+        this._is_drawing = true;
     }
 
     MouseMove(point) {
-        if (this.#is_drawing) {
-            this.#drawing_shape.Update(point);
+        if (this._is_drawing) {
+            this._drawing_shape.Update(point);
         }
     }
 
     MouseUp(point) {
-        if (this.#is_drawing) {
-            const shape = this.#drawing_shape;
-            this.#drawing_shape.Update(point);
-            this.#drawing_shape.Finish();
-            this.#drawing_shape = null;
-            this.#is_drawing = false;
+        if (this._is_drawing) {
+            const shape = this._drawing_shape;
+            this._drawing_shape.Update(point);
+            this._drawing_shape.Finish();
+            this._drawing_shape = null;
+            this._is_drawing = false;
             return shape;
         }
 
@@ -395,45 +395,45 @@ class EllipsePencil {
 }
 
 class RectanglePencil {
-    #is_drawing = false;
-    #color;
-    #drawing_shape = null;
+    _is_drawing = false;
+    _color;
+    _drawing_shape = null;
 
     constructor(color) {
-        this.#color = color;
+        this._color = color;
     }
 
     IsDrawing() {
-        return this.#is_drawing;
+        return this._is_drawing;
     }
 
     GetDrawingShape() {
-        return this.#drawing_shape;
+        return this._drawing_shape;
     }
 
     ChangeColor(color) {
-        this.#color = color;
+        this._color = color;
     }
 
     MouseDown(point) {
-        this.#drawing_shape = new RectangleShape(this.#color);
-        this.#drawing_shape.Start(point);
-        this.#is_drawing = true;
+        this._drawing_shape = new RectangleShape(this._color);
+        this._drawing_shape.Start(point);
+        this._is_drawing = true;
     }
 
     MouseMove(point) {
-        if (this.#is_drawing) {
-            this.#drawing_shape.Update(point);
+        if (this._is_drawing) {
+            this._drawing_shape.Update(point);
         }
     }
 
     MouseUp(point) {
-        if (this.#is_drawing) {
-            const shape = this.#drawing_shape;
-            this.#drawing_shape.Update(point);
-            this.#drawing_shape.Finish();
-            this.#drawing_shape = null;
-            this.#is_drawing = false;
+        if (this._is_drawing) {
+            const shape = this._drawing_shape;
+            this._drawing_shape.Update(point);
+            this._drawing_shape.Finish();
+            this._drawing_shape = null;
+            this._is_drawing = false;
             return shape;
         }
 
@@ -457,10 +457,7 @@ export class Utility {
         let x;
         let y;
 
-        if (e.layerX || e.layerX == 0) { // Firefox
-            x = e.layerX;
-            y = e.layerY;
-        } else if (e.offsetX || e.offsetX == 0) { // Opera
+        if (e.offsetX || e.offsetX == 0) {
             x = e.offsetX;
             y = e.offsetY;
         } else if (e.type != "touchend" && (e.touches[0].clientX || e.touches[0].clientX == 0)) { // mobile

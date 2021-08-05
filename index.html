@@ -56,17 +56,17 @@
         import { ColorPalette, CanvasController, Utility } from './main.js';
 
         class Config {
-            #palette_list;
+            _palette_list;
 
             constructor() {
-                this.#palette_list = this.#create_palette_list();
+                this._palette_list = this._create_palette_list();
             }
 
             GetPaletteList() {
-                return this.#palette_list;
+                return this._palette_list;
             }
 
-            #create_palette_list() {
+            _create_palette_list() {
                 const palette_list = {};
 
                 palette_list["Background"] = new ColorPalette("Background", "#000000");
